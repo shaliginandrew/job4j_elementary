@@ -16,7 +16,7 @@ public class FindAllActionTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream def = System.out;
         System.setOut(new PrintStream(out));
-        Store tracker = new SqlTracker();
+        MemTracker tracker = new MemTracker();
         Item item = new Item("fix bug");
         tracker.add(item);
         FindAllAction act = new FindAllAction();

@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.StringJoiner;
@@ -14,10 +15,10 @@ import static org.junit.Assert.assertThat;
 
 public class StartUITest {
     @Test
-    public void whenAddItem() {
+    public void whenAddItem() throws SQLException {
         String[] answers = {"Fix PC"};
         Input input = new StubInput(answers);
-        Store tracker = new SqlTracker();
+        Store tracker = (Store) new MemTracker();
         new CreateAction().execute(input, tracker);
         Item created = tracker.findAll().get(0);
         Item expected = new Item("Fix PC");
@@ -25,8 +26,8 @@ public class StartUITest {
     }
 
     @Test
-    public void whenReplaceItem() {
-        Store tracker = new SqlTracker();
+    public void whenReplaceItem() throws SQLException {
+        Store tracker = (Store) new MemTracker();
         Item item = new Item("new item");
         tracker.add(item);
         String[] answers = {
@@ -38,8 +39,8 @@ public class StartUITest {
         assertThat(replaced.getName(), is("replaced item"));
     }
     @Test
-    public void whenDeleteItem() {
-       Store tracker = new SqlTracker();
+    public void whenDeleteItem() throws SQLException {
+        Store tracker = (Store) new MemTracker();
         Item item = new Item("new item");
         tracker.add(item);
         String[] answers = {
@@ -51,16 +52,16 @@ public class StartUITest {
     }
 
     @Test
-    public void whenExit() {
+    public void whenExit() throws SQLException {
         StubInput input = new StubInput(
                 new String[] {"0"}
         );
         StubAction action = new StubAction();
-        new StartUI().init(input, new SqlTracker(), new ArrayList<UserAction>(Arrays.asList(action)));
+        new StartUI().init(input, (Store) new MemTracker(), new ArrayList<UserAction>(Arrays.asList(action)));
         assertThat(action.isCall(), is(true));
     }
     @Test
-    public void whenPrtMenu() {
+    public void whenPrtMenu() throws SQLException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream def = System.out;
         System.setOut(new PrintStream(out));
@@ -68,7 +69,7 @@ public class StartUITest {
                 new String[] {"0"}
         );
         StubAction action = new StubAction();
-        new StartUI().init(input, new SqlTracker(), new ArrayList<UserAction>(Arrays.asList(action)));
+        new StartUI().init(input, (Store) new MemTracker(), new ArrayList<UserAction>(Arrays.asList(action)));
         String expect = new StringJoiner(System.lineSeparator(), "", System.lineSeparator())
                 .add("Menu:")
                 .add("0. Stub action")

@@ -7,7 +7,7 @@ import java.util.Random;
  * @version $Id$
  * @since 0.1
  */
-public class MemTracker {
+public class MemTracker implements Store {
     /**
      * Массив для хранение заявок.
      */
@@ -18,6 +18,11 @@ public class MemTracker {
      * Указатель ячейки для новой заявки.
      */
     //private int position = 0;
+
+    @Override
+    public void init() {
+
+    }
 
     /**
      * Метод реализующий добавление заявки в хранилище
@@ -94,6 +99,11 @@ public class MemTracker {
             result = true;
         }
         return result;
+    }
+
+    @Override
+    public void close() throws Exception {
+
     }
 }
 

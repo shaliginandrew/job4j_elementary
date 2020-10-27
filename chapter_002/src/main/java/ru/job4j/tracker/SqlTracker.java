@@ -1,16 +1,13 @@
 package ru.job4j.tracker;
 
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Random;
 
 public class SqlTracker implements Store {
     private Connection cn;
-    private final List<Item> items = new ArrayList<>();
 
     public void init() {
         try (InputStream in = SqlTracker.class.getClassLoader().getResourceAsStream("app.properties")) {
@@ -35,73 +32,64 @@ public class SqlTracker implements Store {
     }
 
     @Override
-    public Item add(Item item) {
-        item.setId(generateId());
-
-        items.add(item);
+    public Item add(Item item) throws SQLException {
+        try (PreparedStatement ps = cn.prepareStatement("insert into items (name) values (?)",
+                Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, item.getName());
+            ps.execute();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    item.setId(String.valueOf(keys.getInt(1)));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return item;
-    }
-
-    private String generateId() {
-        Random rm = new Random();
-        return String.valueOf(Math.abs(rm.nextLong() + System.currentTimeMillis()));
     }
 
     @Override
     public boolean replace(String id, Item item) {
-        boolean result = false;
-        int index = indexOf(id);
-        if (index != -1) {
-            items.set(index, item);
-            item.setId(id);
-            result = true;
-        }
-        return result;
-    }
-
-    private int indexOf(String id) {
-        int rsl = -1;
-        for (int index = 0; index < items.size(); index++) {
-            if (items.get(index).getId().equals(id)) {
-                rsl = index;
-                break;
-            }
-        }
-        return rsl;
+        return false;
     }
 
     @Override
     public boolean delete(String id) {
-        boolean result = false;
-        int findIndex = indexOf(id);
-        if (findIndex != -1) {
-            items.remove(findIndex);
-            result = true;
-        }
-        return result;
+        return false;
     }
-
 
     @Override
     public List<Item> findAll() {
-        return items;
+        return null;
     }
 
     @Override
     public List<Item> findByName(String key) {
-        List<Item> itemsEqualNames = new ArrayList<>();
-        for (int index = 0; index < items.size(); index++) {
-            Item item = items.get(index);
-            if (item.getName().equals(key)) {
-                itemsEqualNames.add(item);
-            }
-        }
-        return itemsEqualNames;
+        return null;
     }
 
     @Override
     public Item findById(String id) {
-        int index = indexOf(id);
-        return index != -1 ? items.get(index) : null;
+        return null;
+    }
+
+    public static void main(String[] args) {
+        Input validate = new ValidateInput(
+                new ConsoleInput()
+        );
+        try (Store tracker = new SqlTracker()) {
+            tracker.init();
+            List<UserAction> actions = new ArrayList<>();
+            actions.add(new CreateAction());
+            actions.add(new FindAllAction());
+            actions.add(new ReplaceAction());
+            actions.add(new DeleteAction());
+            actions.add(new FindByIdAction());
+            actions.add(new FindByNameAction());
+            actions.add(new ExitAction());
+            new StartUI().init(validate, tracker, actions);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

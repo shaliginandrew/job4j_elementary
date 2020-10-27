@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.sql.SQLException;
 import java.util.StringJoiner;
 
 import static org.hamcrest.core.Is.is;
@@ -12,11 +13,11 @@ import static org.junit.Assert.*;
 public class FindByNameActionTest {
 
     @Test
-    public void whenCheckOutput() {
+    public void whenCheckOutput() throws SQLException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream def = System.out;
         System.setOut(new PrintStream(out));
-        Store tracker = new SqlTracker();
+        Store tracker = (Store) new MemTracker();
         Item item = new Item("fix bug");
         tracker.add(item);
         FindByNameAction act = new FindByNameAction();
