@@ -50,27 +50,82 @@ public class SqlTracker implements Store {
 
     @Override
     public boolean replace(String id, Item item) {
-        return false;
+        boolean result = false;
+        try (PreparedStatement ps = cn.prepareStatement("update items set name = (?) where id = (?)")) {
+            ps.setString(1, item.getName());
+            ps.setInt(2, Integer.parseInt(id));
+            if (ps.executeUpdate() != 0) {
+                result = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     @Override
     public boolean delete(String id) {
-        return false;
+        boolean result = false;
+        try (PreparedStatement ps = cn.prepareStatement("delete from items where id = (?)")) {
+            ps.setInt(1, Integer.parseInt(id));
+            if (ps.executeUpdate() != 0) {
+                result = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
+
 
     @Override
     public List<Item> findAll() {
-        return null;
+        List<Item> items = new ArrayList<>();
+        try (PreparedStatement ps = cn.prepareStatement("select *from items")) {
+            try (ResultSet rsl = ps.executeQuery()) {
+                while (rsl.next()) {
+                    Item item = new Item(rsl.getString(2));
+                    item.setId(String.valueOf(rsl.getInt(1)));
+                    items.add(item);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return items;
     }
 
     @Override
     public List<Item> findByName(String key) {
-        return null;
+        List<Item> items = new ArrayList<>();
+        try (PreparedStatement ps = cn.prepareStatement("select id, name from items where name = (?)")) {
+            ps.setString(1, key);
+            try (ResultSet rsl = ps.executeQuery()) {
+                while (rsl.next()) {
+                    Item item = new Item(rsl.getString(2));
+                    item.setId(String.valueOf(rsl.getInt(1)));
+                    items.add(item);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return items;
     }
 
     @Override
     public Item findById(String id) {
-        return null;
+        Item item = null;
+        try (PreparedStatement ps = cn.prepareStatement("select name from items where id = (?)")) {
+            ps.setInt(1, Integer.parseInt(id));
+            ResultSet rsl = ps.executeQuery();
+            if (rsl.next()) {
+                item = new Item(rsl.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return item;
     }
 
     public static void main(String[] args) {
