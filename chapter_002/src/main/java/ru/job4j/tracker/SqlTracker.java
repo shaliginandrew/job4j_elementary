@@ -7,7 +7,12 @@ import java.util.List;
 import java.util.Properties;
 
 public class SqlTracker implements Store {
+
     private Connection cn;
+
+    public SqlTracker(Connection cn) {
+        this.cn = cn;
+    }
 
     public void init() {
         try (InputStream in = SqlTracker.class.getClassLoader().getResourceAsStream("app.properties")) {
@@ -133,7 +138,7 @@ public class SqlTracker implements Store {
         Input validate = new ValidateInput(
                 new ConsoleInput()
         );
-        try (Store tracker = new SqlTracker()) {
+        try (Store tracker = new SqlTracker(null)) {
             tracker.init();
             List<UserAction> actions = new ArrayList<>();
             actions.add(new CreateAction());
