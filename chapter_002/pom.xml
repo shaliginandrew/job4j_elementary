@@ -19,7 +19,7 @@
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>3.6.2</version>
                 <configuration>
-                    <changeLogFile>C:/Projects/job4j_elementary/chapter_002/src/main/java/ru/job4j/tracker/db/master.xml</changeLogFile>
+                    <changeLogFile>${basedir}/db/master.xml</changeLogFile>
                     <url>${db.url}</url>
                     <driver>${db.driver}</driver>
                     <username>${db.username}</username>
